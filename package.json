@@ -1,0 +1,7 @@
+{
+  "name": "laravel-mix-ejs",
+  "version": "0.0.0",
+  "description": "Laravel Mix extension to compile EJS templates",
+  "author": "dsktschy (https://github.com/dsktschy)",
+  "license": "MIT"
+}
