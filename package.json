@@ -5,6 +5,7 @@
   "author": "dsktschy (https://github.com/dsktschy)",
   "license": "MIT",
   "dependencies": {
+    "chokidar": "^3.0.2",
     "ejs": "^2.6.2",
     "fs-extra": "^8.1.0",
     "globby": "^10.0.1"
