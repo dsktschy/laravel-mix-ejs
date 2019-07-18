@@ -15,3 +15,18 @@ test('CompileEjsTask.compile(fromFileRelative, toDirRelative)', async () => {
   expect(result).toBe(true)
   fs.removeSync(path.resolve(__dirname, '../tmp'))
 })
+
+test('CompileEjsTask.remove(fromFileRelative, toDirRelative)', () => {
+  let result = false
+  try {
+    const originalAbsolute = path.resolve(__dirname, './fixtures/index.html')
+    const targetAbsolute = path.resolve(__dirname, '../tmp/index.html')
+    fs.copySync(originalAbsolute, targetAbsolute)
+    CompileEjsTask.remove('tmp/index.ejs', 'tmp')
+    result = !fs.pathExistsSync()
+  } catch (err) {
+    console.error(err)
+  }
+  expect(result).toBe(true)
+  fs.removeSync(path.resolve(__dirname, '../tmp'))
+})

@@ -19,6 +19,7 @@ class CompileEjsTask extends Task {
     chokidar.watch(from, options)
       .on('change', fromFileRelative => CompileEjsTask.compile(fromFileRelative, toDirRelative))
       .on('add', fromFileRelative => CompileEjsTask.compile(fromFileRelative, toDirRelative))
+      .on('unlink', fromFileRelative => CompileEjsTask.remove(fromFileRelative, toDirRelative))
     this.isBeingWatched = true
   }
   // Compile and output file
@@ -29,6 +30,12 @@ class CompileEjsTask extends Task {
     const result = await CompileEjsTask.renderFile(fromFileAbsolute)
       .catch(e => console.error(e))
     fs.outputFileSync(toFileAbsolute, result)
+  }
+  // Remove file
+  static remove (fromFileRelative, toDirRelative) {
+    const { name } = path.parse(fromFileRelative)
+    const toFileAbsolute = path.resolve(toDirRelative, `${name}.html`)
+    fs.removeSync(toFileAbsolute)
   }
   // ejs.renderFile that returns Promise instance
   static renderFile (fromFileAbsolute) {
