@@ -18,6 +18,7 @@ class CompileEjsTask extends Task {
     const options = { usePolling, persistent: true, ignoreInitial: true }
     chokidar.watch(from, options)
       .on('change', fromFileRelative => CompileEjsTask.compile(fromFileRelative, toDirRelative))
+      .on('add', fromFileRelative => CompileEjsTask.compile(fromFileRelative, toDirRelative))
     this.isBeingWatched = true
   }
   // Compile and output file
