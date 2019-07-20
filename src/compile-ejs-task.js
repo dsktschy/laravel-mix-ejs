@@ -6,10 +6,11 @@ const chokidar = require('chokidar')
 const Task = require('laravel-mix/src/tasks/Task')
 
 class CompileEjsTask extends Task {
-  run () {
+  async run () {
     const { from, to: toDirRelative } = this.data
-    globby.sync(from)
-      .forEach(fromFileRelative => CompileEjsTask.compile(fromFileRelative, toDirRelative))
+    const compile = fromFileRelative =>
+      CompileEjsTask.compile(fromFileRelative, toDirRelative)
+    await Promise.all(globby.sync(from).map(compile))
   }
   // Override to watch not only changes but also additions and deletions
   watch (usePolling = false) {

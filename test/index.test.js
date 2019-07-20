@@ -30,3 +30,18 @@ test('CompileEjsTask.remove(fromFileRelative, toDirRelative)', () => {
   expect(result).toBe(true)
   fs.removeSync(path.resolve(__dirname, '../tmp'))
 })
+
+test('compileEjsTask.run()', async () => {
+  let result = false
+  try {
+    await new CompileEjsTask({ from: 'test/fixtures/**/*.ejs', to: 'tmp' })
+      .run()
+    const outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/index.html'))
+    const correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/index.html'))
+    result = outputBuf.equals(correctBuf)
+  } catch (err) {
+    console.error(err)
+  }
+  expect(result).toBe(true)
+  fs.removeSync(path.resolve(__dirname, '../tmp'))
+})
