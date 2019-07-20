@@ -7,11 +7,12 @@
   <title>Fixture 0</title>
 </head>
 <body>
-  <h1>
-    Heading
-  </h1>
-  <p>
-    Text
-  </p>
+  <h1>Heading</h1>
+  <ul>
+    <%_ for (let i = 0; i < 3; i++) { _%>
+    <li><%= i %></li>
+    <%_ } _%>
+  </ul>
+  <%- include('partials/_fixture', { text: 'Partial' }) -%>
 </body>
 </html>

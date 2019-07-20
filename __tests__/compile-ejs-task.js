@@ -7,9 +7,9 @@ const CompileEjsTask = require('../src/compile-ejs-task')
 test('CompileEjsTask.compile(fromFileRelative, toDirRelative)', async () => {
   let result = false
   try {
-    const originalFileAbsolute = path.resolve(__dirname, './fixtures/resources/fixture-0.ejs')
-    const targetFileAbsolute = path.resolve(__dirname, '../tmp/resources/fixture-0.ejs')
-    fs.copySync(originalFileAbsolute, targetFileAbsolute)
+    const originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
+    const targetDirAbsolute = path.resolve(__dirname, '../tmp/resources')
+    fs.copySync(originalDirAbsolute, targetDirAbsolute)
     await CompileEjsTask.compile('tmp/resources/fixture-0.ejs', 'tmp/public')
     const outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/fixture-0.html'))
     const correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public/fixture-0.html'))
@@ -24,11 +24,11 @@ test('CompileEjsTask.compile(fromFileRelative, toDirRelative)', async () => {
 test('CompileEjsTask.remove(fromFileRelative, toDirRelative)', () => {
   let result = false
   try {
-    const originalFileAbsolute = path.resolve(__dirname, './fixtures/public/fixture-0.html')
-    const targetFileAbsolute = path.resolve(__dirname, '../tmp/public/fixture-0.html')
-    fs.copySync(originalFileAbsolute, targetFileAbsolute)
+    const originalDirAbsolute = path.resolve(__dirname, './fixtures/public')
+    const targetDirAbsolute = path.resolve(__dirname, '../tmp/public')
+    fs.copySync(originalDirAbsolute, targetDirAbsolute)
     CompileEjsTask.remove('tmp/resources/fixture-0.ejs', 'tmp/public')
-    result = !fs.pathExistsSync(targetFileAbsolute)
+    result = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/fixture-0.html'))
   } catch (err) {
     console.error(err)
   }
@@ -42,7 +42,7 @@ test('compileEjsTask.run()', async () => {
     const originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
     const targetDirAbsolute = path.resolve(__dirname, '../tmp/resources')
     fs.copySync(originalDirAbsolute, targetDirAbsolute)
-    await new CompileEjsTask({ from: 'tmp/resources/**/*.ejs', to: 'tmp/public' })
+    await new CompileEjsTask({ from: 'tmp/resources/**/!(_)*.ejs', to: 'tmp/public' })
       .run()
     const options = { onlyFiles: true }
     const createBuf = fileRelative =>
@@ -74,7 +74,7 @@ test('compileEjsTask.watch(usePolling = false)', async () => {
     const originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
     const targetDirAbsolute = path.resolve(__dirname, '../tmp/resources')
     fs.copySync(originalDirAbsolute, targetDirAbsolute)
-    compileEjsTask = new CompileEjsTask({ from: 'tmp/resources/**/*.ejs', to: 'tmp/public' })
+    compileEjsTask = new CompileEjsTask({ from: 'tmp/resources/**/!(_)*.ejs', to: 'tmp/public' })
     compileEjsTask.watch(false)
     await delay(msWaiting)
     // Test first running
