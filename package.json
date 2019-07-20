@@ -11,6 +11,7 @@
     "globby": "^10.0.1"
   },
   "devDependencies": {
+    "delay": "^4.3.0",
     "jest": "^24.8.0",
     "laravel-mix": "^4.1.2"
   },

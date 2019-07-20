@@ -6,6 +6,10 @@ const chokidar = require('chokidar')
 const Task = require('laravel-mix/src/tasks/Task')
 
 class CompileEjsTask extends Task {
+  constructor (data) {
+    super(data)
+    this.watcher = null
+  }
   async run () {
     const { from, to: toDirRelative } = this.data
     const compile = fromFileRelative =>
@@ -16,12 +20,21 @@ class CompileEjsTask extends Task {
   watch (usePolling = false) {
     if (this.isBeingWatched) return
     const { from, to: toDirRelative } = this.data
-    const options = { usePolling, persistent: true, ignoreInitial: true }
-    chokidar.watch(from, options)
-      .on('change', fromFileRelative => CompileEjsTask.compile(fromFileRelative, toDirRelative))
-      .on('add', fromFileRelative => CompileEjsTask.compile(fromFileRelative, toDirRelative))
-      .on('unlink', fromFileRelative => CompileEjsTask.remove(fromFileRelative, toDirRelative))
+    const options = { usePolling }
+    const compile = fromFileRelative =>
+      CompileEjsTask.compile(fromFileRelative, toDirRelative)
+    const remove = fromFileRelative =>
+      CompileEjsTask.remove(fromFileRelative, toDirRelative)
+    this.watcher = chokidar.watch(from, options)
+      .on('change', compile)
+      .on('add', compile)
+      .on('unlink', remove)
     this.isBeingWatched = true
+  }
+  // Unwatch
+  unwatch () {
+    if (!this.watcher) return
+    this.watcher.close()
   }
   // Compile and output file
   static async compile (fromFileRelative, toDirRelative) {
