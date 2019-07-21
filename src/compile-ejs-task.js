@@ -5,9 +5,14 @@ const globby = require('globby')
 const chokidar = require('chokidar')
 const Task = require('laravel-mix/src/tasks/Task')
 
+const optionsDefault = {
+  ext: '.html'
+}
+
 class CompileEjsTask extends Task {
   constructor (data) {
     super(data)
+    this.data.options = Object.assign(optionsDefault, this.data.options)
     this.watcher = null
   }
   async run () {
@@ -23,7 +28,7 @@ class CompileEjsTask extends Task {
     const compile = fromFileRelative =>
       CompileEjsTask.compile(fromFileRelative, toDirRelative, data, options)
     const remove = fromFileRelative =>
-      CompileEjsTask.remove(fromFileRelative, toDirRelative)
+      CompileEjsTask.remove(fromFileRelative, toDirRelative, options)
     this.watcher = chokidar.watch(from, { usePolling })
       .on('change', compile)
       .on('add', compile)
@@ -39,15 +44,15 @@ class CompileEjsTask extends Task {
   static async compile (fromFileRelative, toDirRelative, data, options) {
     const { name } = path.parse(fromFileRelative)
     const fromFileAbsolute = path.resolve(fromFileRelative)
-    const toFileAbsolute = path.resolve(toDirRelative, `${name}.html`)
+    const toFileAbsolute = path.resolve(toDirRelative, name + options.ext)
     const result = await CompileEjsTask.renderFile(fromFileAbsolute, data, options)
       .catch(e => console.error(e))
     fs.outputFileSync(toFileAbsolute, result)
   }
   // Remove file
-  static remove (fromFileRelative, toDirRelative) {
+  static remove (fromFileRelative, toDirRelative, options) {
     const { name } = path.parse(fromFileRelative)
-    const toFileAbsolute = path.resolve(toDirRelative, `${name}.html`)
+    const toFileAbsolute = path.resolve(toDirRelative, name + options.ext)
     fs.removeSync(toFileAbsolute)
   }
   // ejs.renderFile that returns Promise instance
