@@ -11,21 +11,20 @@ class CompileEjsTask extends Task {
     this.watcher = null
   }
   async run () {
-    const { from, to: toDirRelative, data } = this.data
+    const { from, to: toDirRelative, data, options } = this.data
     const compile = fromFileRelative =>
-      CompileEjsTask.compile(fromFileRelative, toDirRelative, data)
+      CompileEjsTask.compile(fromFileRelative, toDirRelative, data, options)
     await Promise.all(globby.sync(from).map(compile))
   }
   // Override to watch not only changes but also additions and deletions
   watch (usePolling = false) {
     if (this.isBeingWatched) return
-    const { from, to: toDirRelative, data } = this.data
-    const options = { usePolling }
+    const { from, to: toDirRelative, data, options } = this.data
     const compile = fromFileRelative =>
-      CompileEjsTask.compile(fromFileRelative, toDirRelative, data)
+      CompileEjsTask.compile(fromFileRelative, toDirRelative, data, options)
     const remove = fromFileRelative =>
       CompileEjsTask.remove(fromFileRelative, toDirRelative)
-    this.watcher = chokidar.watch(from, options)
+    this.watcher = chokidar.watch(from, { usePolling })
       .on('change', compile)
       .on('add', compile)
       .on('unlink', remove)
@@ -37,11 +36,11 @@ class CompileEjsTask extends Task {
     this.watcher.close()
   }
   // Compile and output file
-  static async compile (fromFileRelative, toDirRelative, data) {
+  static async compile (fromFileRelative, toDirRelative, data, options) {
     const { name } = path.parse(fromFileRelative)
     const fromFileAbsolute = path.resolve(fromFileRelative)
     const toFileAbsolute = path.resolve(toDirRelative, `${name}.html`)
-    const result = await CompileEjsTask.renderFile(fromFileAbsolute, data)
+    const result = await CompileEjsTask.renderFile(fromFileAbsolute, data, options)
       .catch(e => console.error(e))
     fs.outputFileSync(toFileAbsolute, result)
   }
@@ -52,9 +51,9 @@ class CompileEjsTask extends Task {
     fs.removeSync(toFileAbsolute)
   }
   // ejs.renderFile that returns Promise instance
-  static renderFile (fromFileAbsolute, data) {
+  static renderFile (fromFileAbsolute, data, options) {
     return new Promise((resolve, reject) => {
-      ejs.renderFile(fromFileAbsolute, data, {}, (err, str) => {
+      ejs.renderFile(fromFileAbsolute, data, options, (err, str) => {
         if (err) reject(err)
         else resolve(str)
       })

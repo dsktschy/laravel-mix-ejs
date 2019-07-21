@@ -14,7 +14,8 @@ test('CompileEjsTask.compile()', async () => {
     const from = 'tmp/resources/fixture-0.ejs'
     const to = 'tmp/public'
     const data = { name: 'Laravel Mix EJS', getAuthor: () => author }
-    await CompileEjsTask.compile(from, to, data)
+    const options = { root: targetDirAbsolute }
+    await CompileEjsTask.compile(from, to, data, options)
     const outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/fixture-0.html'))
     const correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public/fixture-0.html'))
     result = outputBuf.equals(correctBuf)
@@ -51,12 +52,13 @@ test('compileEjsTask.run()', async () => {
     const from = 'tmp/resources/**/!(_)*.ejs'
     const to = 'tmp/public'
     const data = { name: 'Laravel Mix EJS', getAuthor: () => author }
-    await new CompileEjsTask({ from, to, data }).run()
-    const options = { onlyFiles: true }
+    const optionsTask = { root: targetDirAbsolute }
+    await new CompileEjsTask({ from, to, data, options: optionsTask }).run()
+    const optionsGlobby = { onlyFiles: true }
     const createBuf = fileRelative =>
       fs.readFileSync(path.resolve(__dirname, '../', fileRelative))
-    const outputBufList = globby.sync('tmp/public', options).map(createBuf)
-    const correctBufList = globby.sync('__tests__/fixtures/public', options).map(createBuf)
+    const outputBufList = globby.sync('tmp/public', optionsGlobby).map(createBuf)
+    const correctBufList = globby.sync('__tests__/fixtures/public', optionsGlobby).map(createBuf)
     const equalsToCorrectBuf =
       (outputBuf, i) => outputBuf.equals(correctBufList[i])
     result = outputBufList.every(equalsToCorrectBuf)
@@ -85,15 +87,16 @@ test('compileEjsTask.watch()', async () => {
     const from = 'tmp/resources/**/!(_)*.ejs'
     const to = 'tmp/public'
     const data = { name: 'Laravel Mix EJS', getAuthor: () => author }
-    compileEjsTask = new CompileEjsTask({ from, to, data })
+    const optionsTask = { root: targetDirAbsolute }
+    compileEjsTask = new CompileEjsTask({ from, to, data, options: optionsTask })
     compileEjsTask.watch(false)
     await delay(msWaiting)
     // Test first running
-    const options = { onlyFiles: true }
+    const optionsGlobby = { onlyFiles: true }
     const createBuf = fileRelative =>
       fs.readFileSync(path.resolve(__dirname, '../', fileRelative))
-    const outputBufList = globby.sync('tmp/public', options).map(createBuf)
-    const correctBufList = globby.sync('__tests__/fixtures/public', options).map(createBuf)
+    const outputBufList = globby.sync('tmp/public', optionsGlobby).map(createBuf)
+    const correctBufList = globby.sync('__tests__/fixtures/public', optionsGlobby).map(createBuf)
     const equalsToCorrectBuf =
       (outputBuf, i) => outputBuf.equals(correctBufList[i])
     results[0] = outputBufList.every(equalsToCorrectBuf)
