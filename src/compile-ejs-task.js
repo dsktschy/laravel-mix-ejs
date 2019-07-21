@@ -11,18 +11,18 @@ class CompileEjsTask extends Task {
     this.watcher = null
   }
   async run () {
-    const { from, to: toDirRelative } = this.data
+    const { from, to: toDirRelative, data } = this.data
     const compile = fromFileRelative =>
-      CompileEjsTask.compile(fromFileRelative, toDirRelative)
+      CompileEjsTask.compile(fromFileRelative, toDirRelative, data)
     await Promise.all(globby.sync(from).map(compile))
   }
   // Override to watch not only changes but also additions and deletions
   watch (usePolling = false) {
     if (this.isBeingWatched) return
-    const { from, to: toDirRelative } = this.data
+    const { from, to: toDirRelative, data } = this.data
     const options = { usePolling }
     const compile = fromFileRelative =>
-      CompileEjsTask.compile(fromFileRelative, toDirRelative)
+      CompileEjsTask.compile(fromFileRelative, toDirRelative, data)
     const remove = fromFileRelative =>
       CompileEjsTask.remove(fromFileRelative, toDirRelative)
     this.watcher = chokidar.watch(from, options)
@@ -37,11 +37,11 @@ class CompileEjsTask extends Task {
     this.watcher.close()
   }
   // Compile and output file
-  static async compile (fromFileRelative, toDirRelative) {
+  static async compile (fromFileRelative, toDirRelative, data) {
     const { name } = path.parse(fromFileRelative)
     const fromFileAbsolute = path.resolve(fromFileRelative)
     const toFileAbsolute = path.resolve(toDirRelative, `${name}.html`)
-    const result = await CompileEjsTask.renderFile(fromFileAbsolute)
+    const result = await CompileEjsTask.renderFile(fromFileAbsolute, data)
       .catch(e => console.error(e))
     fs.outputFileSync(toFileAbsolute, result)
   }
@@ -52,9 +52,9 @@ class CompileEjsTask extends Task {
     fs.removeSync(toFileAbsolute)
   }
   // ejs.renderFile that returns Promise instance
-  static renderFile (fromFileAbsolute) {
+  static renderFile (fromFileAbsolute, data) {
     return new Promise((resolve, reject) => {
-      ejs.renderFile(fromFileAbsolute, {}, {}, (err, str) => {
+      ejs.renderFile(fromFileAbsolute, data, {}, (err, str) => {
         if (err) reject(err)
         else resolve(str)
       })
