@@ -6,6 +6,7 @@ const chokidar = require('chokidar')
 const Task = require('laravel-mix/src/tasks/Task')
 
 const optionsDefault = {
+  base: '',
   ext: '.html'
 }
 
@@ -19,7 +20,7 @@ class CompileEjsTask extends Task {
     const { from, to: toDirRelative, data, options } = this.data
     const compile = fromFileRelative =>
       CompileEjsTask.compile(fromFileRelative, toDirRelative, data, options)
-    await Promise.all(globby.sync(from).map(compile))
+    await Promise.all(globby.sync(from, { onlyFiles: true }).map(compile))
   }
   // Override to watch not only changes but also additions and deletions
   watch (usePolling = false) {
@@ -42,17 +43,21 @@ class CompileEjsTask extends Task {
   }
   // Compile and output file
   static async compile (fromFileRelative, toDirRelative, data, options) {
-    const { name } = path.parse(fromFileRelative)
+    const { name, dir } = path.parse(fromFileRelative)
+    let subDir = options.base ? dir.split(options.base).pop() : ''
+    subDir = subDir.startsWith('/') ? subDir.slice(1) : subDir
+    const toFileAbsolute = path.resolve(toDirRelative, subDir, name + options.ext)
     const fromFileAbsolute = path.resolve(fromFileRelative)
-    const toFileAbsolute = path.resolve(toDirRelative, name + options.ext)
     const result = await CompileEjsTask.renderFile(fromFileAbsolute, data, options)
       .catch(e => console.error(e))
     fs.outputFileSync(toFileAbsolute, result)
   }
   // Remove file
   static remove (fromFileRelative, toDirRelative, options) {
-    const { name } = path.parse(fromFileRelative)
-    const toFileAbsolute = path.resolve(toDirRelative, name + options.ext)
+    const { name, dir } = path.parse(fromFileRelative)
+    let subDir = options.base ? dir.split(options.base).pop() : ''
+    subDir = subDir.startsWith('/') ? subDir.slice(1) : subDir
+    const toFileAbsolute = path.resolve(toDirRelative, subDir, name + options.ext)
     fs.removeSync(toFileAbsolute)
   }
   // ejs.renderFile that returns Promise instance
