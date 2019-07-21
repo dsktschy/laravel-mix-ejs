@@ -18,22 +18,28 @@ class CompileEjsTask extends Task {
   }
   async run () {
     const { from, to: toDirRelative, data, options } = this.data
-    const compile = fromFileRelative =>
-      CompileEjsTask.compile(fromFileRelative, toDirRelative, data, options)
-    await Promise.all(globby.sync(from, { onlyFiles: true }).map(compile))
+    const compileFile = fromFileRelative =>
+      CompileEjsTask.compileFile(fromFileRelative, toDirRelative, data, options)
+    await Promise.all(globby.sync(from, { onlyFiles: true }).map(compileFile))
   }
   // Override to watch not only changes but also additions and deletions
   watch (usePolling = false) {
     if (this.isBeingWatched) return
     const { from, to: toDirRelative, data, options } = this.data
-    const compile = fromFileRelative =>
-      CompileEjsTask.compile(fromFileRelative, toDirRelative, data, options)
-    const remove = fromFileRelative =>
-      CompileEjsTask.remove(fromFileRelative, toDirRelative, options)
+    const compileFile = fromFileRelative =>
+      CompileEjsTask.compileFile(fromFileRelative, toDirRelative, data, options)
+    const ensureDir = fromDirRelative =>
+      CompileEjsTask.ensureDir(fromDirRelative, toDirRelative, options)
+    const removeFile = fromFileRelative =>
+      CompileEjsTask.removeFile(fromFileRelative, toDirRelative, options)
+    const removeDir = fromFileRelative =>
+      CompileEjsTask.removeDir(fromFileRelative, toDirRelative, options)
     this.watcher = chokidar.watch(from, { usePolling })
-      .on('change', compile)
-      .on('add', compile)
-      .on('unlink', remove)
+      .on('change', compileFile)
+      .on('add', compileFile)
+      .on('addDir', ensureDir)
+      .on('unlink', removeFile)
+      .on('unlinkDir', removeDir)
     this.isBeingWatched = true
   }
   // Unwatch
@@ -42,7 +48,7 @@ class CompileEjsTask extends Task {
     this.watcher.close()
   }
   // Compile and output file
-  static async compile (fromFileRelative, toDirRelative, data, options) {
+  static async compileFile (fromFileRelative, toDirRelative, data, options) {
     const { name, dir } = path.parse(fromFileRelative)
     let subDir = options.base ? dir.split(options.base).pop() : ''
     subDir = subDir.startsWith('/') ? subDir.slice(1) : subDir
@@ -52,13 +58,29 @@ class CompileEjsTask extends Task {
       .catch(e => console.error(e))
     fs.outputFileSync(toFileAbsolute, result)
   }
+  // Ensure directory
+  static ensureDir (fromDirRelative, toDirRelative, options) {
+    const { name, dir } = path.parse(fromDirRelative)
+    let subDir = options.base ? dir.split(options.base).pop() : ''
+    subDir = subDir.startsWith('/') ? subDir.slice(1) : subDir
+    const toDirAbsolute = path.resolve(toDirRelative, subDir, name)
+    fs.ensureDirSync(toDirAbsolute)
+  }
   // Remove file
-  static remove (fromFileRelative, toDirRelative, options) {
+  static removeFile (fromFileRelative, toDirRelative, options) {
     const { name, dir } = path.parse(fromFileRelative)
     let subDir = options.base ? dir.split(options.base).pop() : ''
     subDir = subDir.startsWith('/') ? subDir.slice(1) : subDir
     const toFileAbsolute = path.resolve(toDirRelative, subDir, name + options.ext)
     fs.removeSync(toFileAbsolute)
+  }
+  // Remove directory
+  static removeDir (fromDirRelative, toDirRelative, options) {
+    const { name, dir } = path.parse(fromDirRelative)
+    let subDir = options.base ? dir.split(options.base).pop() : ''
+    subDir = subDir.startsWith('/') ? subDir.slice(1) : subDir
+    const toDirAbsolute = path.resolve(toDirRelative, subDir, name)
+    fs.removeSync(toDirAbsolute)
   }
   // ejs.renderFile that returns Promise instance
   static renderFile (fromFileAbsolute, data, options) {

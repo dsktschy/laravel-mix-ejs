@@ -5,7 +5,7 @@ const delay = require('delay')
 const { author } = require('../package.json')
 const CompileEjsTask = require('../src/compile-ejs-task')
 
-test('CompileEjsTask.compile()', async () => {
+test('CompileEjsTask.compileFile()', async () => {
   const results = [ false, false ]
   try {
     const originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
@@ -20,14 +20,14 @@ test('CompileEjsTask.compile()', async () => {
     // Test case that ext is '.html'
     to = 'tmp/public-html'
     options = { ext: '.html', root: targetDirAbsolute }
-    await CompileEjsTask.compile(from, to, data, options)
+    await CompileEjsTask.compileFile(from, to, data, options)
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public-html/fixture-0.html'))
     correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-html/fixture-0.html'))
     results[0] = outputBuf.equals(correctBuf)
     // Test case that ext is '.php'
     to = 'tmp/public-php'
     options = { ext: '.php', root: targetDirAbsolute }
-    await CompileEjsTask.compile(from, to, data, options)
+    await CompileEjsTask.compileFile(from, to, data, options)
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public-php/fixture-0.php'))
     correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-php/fixture-0.php'))
     results[1] = outputBuf.equals(correctBuf)
@@ -38,7 +38,22 @@ test('CompileEjsTask.compile()', async () => {
   fs.removeSync(path.resolve(__dirname, '../tmp'))
 })
 
-test('CompileEjsTask.remove()', () => {
+test('CompileEjsTask.ensureDir()', async () => {
+  const results = [ false ]
+  try {
+    const from = 'tmp/resources/child-2'
+    const to = 'tmp/public'
+    const options = {}
+    CompileEjsTask.ensureDir(from, to, options)
+    results[0] = fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/child-2'))
+  } catch (err) {
+    console.error(err)
+  }
+  expect(results.every(result => result)).toBe(true)
+  fs.removeSync(path.resolve(__dirname, '../tmp'))
+})
+
+test('CompileEjsTask.removeFile()', () => {
   const results = [ false, false ]
   try {
     const originalHtmlDirAbsolute = path.resolve(__dirname, './fixtures/public-html')
@@ -53,13 +68,31 @@ test('CompileEjsTask.remove()', () => {
     // Test case that ext is '.html'
     to = 'tmp/public-html'
     options = { ext: '.html' }
-    CompileEjsTask.remove(from, to, options)
+    CompileEjsTask.removeFile(from, to, options)
     results[0] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/fixture-0.html'))
     // Test case that ext is '.php'
     to = 'tmp/public-php'
     options = { ext: '.php' }
-    CompileEjsTask.remove(from, to, options)
+    CompileEjsTask.removeFile(from, to, options)
     results[1] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/fixture-0.php'))
+  } catch (err) {
+    console.error(err)
+  }
+  expect(results.every(result => result)).toBe(true)
+  fs.removeSync(path.resolve(__dirname, '../tmp'))
+})
+
+test('CompileEjsTask.removeDir()', () => {
+  const results = [ false ]
+  try {
+    const originalDirAbsolute = path.resolve(__dirname, './fixtures/public-html/child-0')
+    const targetDirAbsolute = path.resolve(__dirname, '../tmp/public/child-0')
+    fs.copySync(originalDirAbsolute, targetDirAbsolute)
+    const from = 'tmp/resources/child-0'
+    const to = 'tmp/public'
+    const options = {}
+    CompileEjsTask.removeDir(from, to, options)
+    results[0] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/child-0'))
   } catch (err) {
     console.error(err)
   }
@@ -73,7 +106,7 @@ test('compileEjsTask.run()', async () => {
     const originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
     const targetDirAbsolute = path.resolve(__dirname, '../tmp/resources')
     fs.copySync(originalDirAbsolute, targetDirAbsolute)
-    const from = 'tmp/resources/**/!(_)*.ejs'
+    const from = [ 'tmp/resources/**/*', '!tmp/resources/partials' ]
     const to = 'tmp/public'
     const data = { name: 'Laravel Mix EJS', getAuthor: () => author }
     const options = { root: targetDirAbsolute, base: 'tmp/resources' }
@@ -120,7 +153,7 @@ test('compileEjsTask.watch()', async () => {
     originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
     targetDirAbsolute = path.resolve(__dirname, '../tmp/resources')
     fs.copySync(originalDirAbsolute, targetDirAbsolute)
-    const from = 'tmp/resources/**/!(_)*.ejs'
+    const from = [ 'tmp/resources/**/*', '!tmp/resources/partials' ]
     const to = 'tmp/public'
     const data = { name: 'Laravel Mix EJS', getAuthor: () => author }
     const options = { root: targetDirAbsolute, base: 'tmp/resources' }
@@ -151,6 +184,7 @@ test('compileEjsTask.watch()', async () => {
     // Test to change
     originalDirAbsolute = path.resolve(__dirname, './fixtures/resources/child-1')
     targetDirAbsolute = path.resolve(__dirname, '../tmp/resources/child-0')
+    fs.removeSync(targetDirAbsolute)
     fs.copySync(originalDirAbsolute, targetDirAbsolute)
     await delay(msWaiting)
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/child-0/fixture-child-1.html'))
