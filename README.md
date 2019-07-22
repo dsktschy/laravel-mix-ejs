@@ -13,17 +13,14 @@ npm install laravel-mix-ejs --save-dev
 Then, require it within your `webpack.mix.js` file, like so:
 
 ```js
-let mix = require('laravel-mix');
+let mix = require('laravel-mix')
 
-require('laravel-mix-ejs');
+require('laravel-mix-ejs')
 
 mix
-    .js('resources/js/app.js', 'public/js')
-    .sass('resources/sass/app.scss', 'public/css')
-    .ejs(
-      [ `resources/views/**/*`, `!resources/views/partials` ],
-      'public'
-    );
+  .js('resources/js/app.js', 'public/js')
+  .sass('resources/sass/app.scss', 'public/css')
+  .ejs('resources/views/**/*', 'public')
 ```
 
 And you're done!
@@ -34,9 +31,9 @@ With the 3rd argument, it is possible to inject variables used in templates.
 
 ```js
 mix.ejs(
-    [ `resources/views/**/*`, `!resources/views/partials` ],
-    'public',
-    { foo: 'bar' }
+  'resources/views/**/*',
+  'public',
+  { foo: 'bar' }
 )
 ```
 
@@ -46,10 +43,10 @@ With the 4th argument, it is possible to set [options for EJS](https://github.co
 
 ```js
 mix.ejs(
-    [ `resources/views/**/*`, `!resources/views/partials` ],
-    'public',
-    { foo: 'bar' },
-    { rmWhitespace: true }
+  'resources/views/**/*',
+  'public',
+  { foo: 'bar' },
+  { rmWhitespace: true }
 )
 ```
 
@@ -61,10 +58,10 @@ This option keeps a hierarchical structure (like Gulp).
 
 ```js
 mix.ejs(
-    [ `resources/views/**/*`, `!resources/views/partials` ],
-    'public',
-    { foo: 'bar' },
-    { base: 'resources/views' }
+  'resources/views/**/*',
+  'public',
+  { foo: 'bar' },
+  { base: 'resources/views' }
 )
 ```
 
@@ -74,9 +71,9 @@ This option changes the output file extension.
 
 ```js
 mix.ejs(
-    [ `resources/views/**/*`, `!resources/views/partials` ],
-    'public',
-    { foo: 'bar' },
-    { ext: '.php' }
+  'resources/views/**/*',
+  'public',
+  { foo: 'bar' },
+  { ext: '.php' }
 )
 ```
