@@ -16,10 +16,23 @@
     "laravel-mix": "^4.1.2"
   },
   "peerDependencies": {
-    "laravel-mix": "^4.1.2"
+    "laravel-mix": ">=4.0.0"
   },
   "main": "src/index.js",
   "scripts": {
     "test": "jest"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dsktschy/laravel-mix-ejs.git"
+  },
+  "keywords": [
+    "laravel",
+    "mix",
+    "ejs"
+  ],
+  "bugs": {
+    "url": "https://github.com/dsktschy/laravel-mix-ejs/issues"
+  },
+  "homepage": "https://github.com/dsktschy/laravel-mix-ejs#readme"
 }
