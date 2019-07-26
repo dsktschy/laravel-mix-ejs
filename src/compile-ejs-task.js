@@ -3,11 +3,14 @@ const path = require('path')
 const fs = require('fs-extra')
 const globby = require('globby')
 const chokidar = require('chokidar')
+const anymatch = require('anymatch')
 const Task = require('laravel-mix/src/tasks/Task')
 
 const optionsDefault = {
   base: '',
-  ext: '.html'
+  ext: '.html',
+  partials: [],
+  _onError: () => {}
 }
 
 class CompileEjsTask extends Task {
@@ -16,36 +19,54 @@ class CompileEjsTask extends Task {
     this.data.options = Object.assign(optionsDefault, this.data.options)
     this.watcher = null
   }
-  async run () {
-    const { from, to: toDirRelative, data, options } = this.data
-    const compileFile = fromFileRelative =>
-      CompileEjsTask.compileFile(fromFileRelative, toDirRelative, data, options)
-    await Promise.all(globby.sync(from, { onlyFiles: true }).map(compileFile))
+  run () {
+    this.compileAll()
   }
   // Override to watch not only changes but also additions and deletions
   watch (usePolling = false) {
     if (this.isBeingWatched) return
-    const { from, to: toDirRelative, data, options } = this.data
-    const compileFile = fromFileRelative =>
-      CompileEjsTask.compileFile(fromFileRelative, toDirRelative, data, options)
-    const ensureDir = fromDirRelative =>
-      CompileEjsTask.ensureDir(fromDirRelative, toDirRelative, options)
-    const removeFile = fromFileRelative =>
-      CompileEjsTask.removeFile(fromFileRelative, toDirRelative, options)
-    const removeDir = fromFileRelative =>
-      CompileEjsTask.removeDir(fromFileRelative, toDirRelative, options)
-    this.watcher = chokidar.watch(from, { usePolling })
-      .on('change', compileFile)
-      .on('add', compileFile)
-      .on('addDir', ensureDir)
-      .on('unlink', removeFile)
-      .on('unlinkDir', removeDir)
+    const { from } = this.data
+    const switchCallback = (eventName, fromRelative) =>
+      this.switchCallback(eventName, fromRelative, true)
+    this.watcher = chokidar.watch(from, { usePolling }).on('all', switchCallback)
     this.isBeingWatched = true
   }
   // Use when closing test
   unwatch () {
     if (!this.watcher) return
     this.watcher.close()
+  }
+  switchCallback (eventName, fromRelative, watchingPartials) {
+    const { to: toDirRelative, data, options } = this.data
+    const partial = anymatch(options.partials, fromRelative)
+    switch (eventName) {
+      case 'change':
+      case 'add':
+        if (!partial)
+          CompileEjsTask.compileFile(fromRelative, toDirRelative, data, options)
+            .catch(options._onError)
+        else if (watchingPartials)
+          this.compileAll()
+        break
+      case 'addDir':
+        CompileEjsTask.ensureDir(fromRelative, toDirRelative, options)
+        break
+      case 'unlink':
+        if (!partial)
+          CompileEjsTask.removeFile(fromRelative, toDirRelative, options)
+        else if (watchingPartials)
+          this.compileAll()
+        break
+      case 'unlinkDir':
+        CompileEjsTask.removeDir(fromRelative, toDirRelative, options)
+        break
+    }
+  }
+  // Compile and output all files
+  compileAll () {
+    const { from } = this.data
+    globby.sync(from, { onlyFiles: true })
+      .map(fromRelative => this.switchCallback('change', fromRelative, false))
   }
   // Compile and output file
   static async compileFile (fromFileRelative, toDirRelative, data, options) {
@@ -55,7 +76,6 @@ class CompileEjsTask extends Task {
     const toFileAbsolute = path.resolve(toDirRelative, subDir, name + options.ext)
     const fromFileAbsolute = path.resolve(fromFileRelative)
     const result = await CompileEjsTask.renderFile(fromFileAbsolute, data, options)
-      .catch(e => console.error(e))
     fs.outputFileSync(toFileAbsolute, result)
   }
   static ensureDir (fromDirRelative, toDirRelative, options) {

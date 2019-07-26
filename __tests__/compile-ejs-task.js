@@ -103,14 +103,22 @@ test('CompileEjsTask.removeDir()', () => {
 test('compileEjsTask.run()', async () => {
   const results = [ false, false ]
   try {
+    // Wait for several ms, instead of subscription to events
+    // Because there is no event to notify that compilation is over
+    const msWaiting = 250
     const originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
     const targetDirAbsolute = path.resolve(__dirname, '../tmp/resources')
     fs.copySync(originalDirAbsolute, targetDirAbsolute)
-    const from = [ 'tmp/resources/**/*', '!tmp/resources/partials' ]
+    const from = 'tmp/resources/**/*'
     const to = 'tmp/public'
     const data = { name: 'Laravel Mix EJS', getAuthor: () => author }
-    const options = { root: targetDirAbsolute, base: 'tmp/resources' }
-    await new CompileEjsTask({ from, to, data, options }).run()
+    const options = {
+      root: targetDirAbsolute,
+      base: 'tmp/resources',
+      partials: 'tmp/resources/partials/**/*'
+    }
+    new CompileEjsTask({ from, to, data, options }).run()
+    await delay(msWaiting)
     const outputDirRelative = 'tmp/public'
     const correctDirRelative = '__tests__/fixtures/public-html'
     const outputPaths = globby.sync(outputDirRelative, { onlyFiles: true })
@@ -139,7 +147,7 @@ test('compileEjsTask.run()', async () => {
 })
 
 test('compileEjsTask.watch()', async () => {
-  const results = [ false, false, false, false, false ]
+  const results = [ false, false, false, false, false, false, false, false ]
   let compileEjsTask = null
   try {
     // Wait for several ms, instead of subscription to events
@@ -147,16 +155,27 @@ test('compileEjsTask.watch()', async () => {
     const msWaiting = 250
     let originalDirAbsolute = ''
     let targetDirAbsolute = ''
+    let originalFileAbsolute = ''
+    let targetFileAbsolute = ''
     let outputBuf = null
     let correctBuf = null
+    let testingToWatchRemovingPartial = false
     // Start watching
     originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
     targetDirAbsolute = path.resolve(__dirname, '../tmp/resources')
     fs.copySync(originalDirAbsolute, targetDirAbsolute)
-    const from = [ 'tmp/resources/**/*', '!tmp/resources/partials' ]
+    const from = 'tmp/resources/**/*'
     const to = 'tmp/public'
     const data = { name: 'Laravel Mix EJS', getAuthor: () => author }
-    const options = { root: targetDirAbsolute, base: 'tmp/resources' }
+    const options = {
+      root: targetDirAbsolute,
+      base: 'tmp/resources',
+      partials: 'tmp/resources/partials/**/*',
+      _onError (err) {
+        if (!testingToWatchRemovingPartial) throw err
+        results[6] = true
+      }
+    }
     compileEjsTask = new CompileEjsTask({ from, to, data, options })
     compileEjsTask.watch(false)
     // Test first running
@@ -181,7 +200,7 @@ test('compileEjsTask.watch()', async () => {
     const equalsToCorrectBuf =
       (outputBuf, i) => outputBuf.equals(correctBufList[i])
     results[1] = outputBufList.every(equalsToCorrectBuf)
-    // Test to change
+    // Test to watch changing directory and file
     originalDirAbsolute = path.resolve(__dirname, './fixtures/resources/child-1')
     targetDirAbsolute = path.resolve(__dirname, '../tmp/resources/child-0')
     fs.removeSync(targetDirAbsolute)
@@ -190,7 +209,7 @@ test('compileEjsTask.watch()', async () => {
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/child-0/fixture-child-1.html'))
     correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-html/child-1/fixture-child-1.html'))
     results[2] = outputBuf.equals(correctBuf)
-    // Test to add
+    // Test to watch adding directory and file
     originalDirAbsolute = path.resolve(__dirname, './fixtures/resources/child-1')
     targetDirAbsolute = path.resolve(__dirname, '../tmp/resources/child-2')
     fs.copySync(originalDirAbsolute, targetDirAbsolute)
@@ -198,10 +217,31 @@ test('compileEjsTask.watch()', async () => {
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/child-2/fixture-child-1.html'))
     correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-html/child-1/fixture-child-1.html'))
     results[3] = outputBuf.equals(correctBuf)
-    // Test to remove
+    // Test to watch removing directory and file
     fs.removeSync(path.resolve(__dirname, '../tmp/resources/child-2'))
     await delay(msWaiting)
     results[4] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/child-2/fixture-child-1.html'))
+    // Test to watch changing partial
+    originalFileAbsolute = path.resolve(__dirname, './fixtures/resources/partials/partial-1.ejs')
+    targetFileAbsolute = path.resolve(__dirname, '../tmp/resources/partials/partial-0.ejs')
+    fs.copySync(originalFileAbsolute, targetFileAbsolute)
+    await delay(msWaiting)
+    outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/fixture-0.html'))
+    correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-html/fixture-1.html'))
+    results[5] = outputBuf.equals(correctBuf)
+    // Test to watch removing partial
+    testingToWatchRemovingPartial = true
+    fs.removeSync(path.resolve(__dirname, '../tmp/resources/partials/partial-0.ejs'))
+    await delay(msWaiting)
+    testingToWatchRemovingPartial = false
+    // Test to watch adding partial
+    originalFileAbsolute = path.resolve(__dirname, './fixtures/resources/partials/partial-0.ejs')
+    targetFileAbsolute = path.resolve(__dirname, '../tmp/resources/partials/partial-0.ejs')
+    fs.copySync(originalFileAbsolute, targetFileAbsolute)
+    await delay(msWaiting)
+    outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/fixture-0.html'))
+    correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-html/fixture-0.html'))
+    results[7] = outputBuf.equals(correctBuf)
   } catch (err) {
     console.error(err)
   }
