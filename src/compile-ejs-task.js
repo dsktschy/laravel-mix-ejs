@@ -42,7 +42,7 @@ class CompileEjsTask extends Task {
       .on('unlinkDir', removeDir)
     this.isBeingWatched = true
   }
-  // Unwatch
+  // Use when closing test
   unwatch () {
     if (!this.watcher) return
     this.watcher.close()
@@ -58,7 +58,6 @@ class CompileEjsTask extends Task {
       .catch(e => console.error(e))
     fs.outputFileSync(toFileAbsolute, result)
   }
-  // Ensure directory
   static ensureDir (fromDirRelative, toDirRelative, options) {
     const { name, dir } = path.parse(fromDirRelative)
     let subDir = options.base ? dir.split(options.base).pop() : ''
@@ -66,7 +65,6 @@ class CompileEjsTask extends Task {
     const toDirAbsolute = path.resolve(toDirRelative, subDir, name)
     fs.ensureDirSync(toDirAbsolute)
   }
-  // Remove file
   static removeFile (fromFileRelative, toDirRelative, options) {
     const { name, dir } = path.parse(fromFileRelative)
     let subDir = options.base ? dir.split(options.base).pop() : ''
@@ -74,7 +72,6 @@ class CompileEjsTask extends Task {
     const toFileAbsolute = path.resolve(toDirRelative, subDir, name + options.ext)
     fs.removeSync(toFileAbsolute)
   }
-  // Remove directory
   static removeDir (fromDirRelative, toDirRelative, options) {
     const { name, dir } = path.parse(fromDirRelative)
     let subDir = options.base ? dir.split(options.base).pop() : ''
