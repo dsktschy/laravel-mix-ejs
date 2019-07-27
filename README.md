@@ -50,7 +50,7 @@ mix.ejs(
 )
 ```
 
-You can also set the following two extra options in it.
+You can also set the following extra options in it.
 
 #### base
 
@@ -75,5 +75,18 @@ mix.ejs(
   'public',
   { foo: 'bar' },
   { ext: '.php' }
+)
+```
+
+#### partials
+
+Files set to this option will be watched but not compiled.
+
+```js
+mix.ejs(
+  'resources/views/**/*',
+  'public',
+  { foo: 'bar' },
+  { partials: 'resources/views/partials/**/*' }
 )
 ```
