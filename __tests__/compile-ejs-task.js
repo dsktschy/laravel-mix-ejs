@@ -6,7 +6,8 @@ const { author } = require('../package.json')
 const CompileEjsTask = require('../src/compile-ejs-task')
 
 test('CompileEjsTask.compileFile()', async () => {
-  const results = [ false, false ]
+  const results = Array(2).fill(false)
+  let i = -1
   try {
     const originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
     const targetDirAbsolute = path.resolve(__dirname, '../tmp/resources')
@@ -23,14 +24,14 @@ test('CompileEjsTask.compileFile()', async () => {
     await CompileEjsTask.compileFile(from, to, data, options)
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public-html/fixture-0.html'))
     correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-html/fixture-0.html'))
-    results[0] = outputBuf.equals(correctBuf)
+    results[++i] = outputBuf.equals(correctBuf)
     // Test case that ext is '.php'
     to = 'tmp/public-php'
     options = { ext: '.php', root: targetDirAbsolute }
     await CompileEjsTask.compileFile(from, to, data, options)
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public-php/fixture-0.php'))
     correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-php/fixture-0.php'))
-    results[1] = outputBuf.equals(correctBuf)
+    results[++i] = outputBuf.equals(correctBuf)
   } catch (err) {
     console.error(err)
   }
@@ -39,13 +40,14 @@ test('CompileEjsTask.compileFile()', async () => {
 })
 
 test('CompileEjsTask.ensureDir()', async () => {
-  const results = [ false ]
+  const results = Array(1).fill(false)
+  let i = -1
   try {
     const from = 'tmp/resources/child-2'
     const to = 'tmp/public'
     const options = {}
     CompileEjsTask.ensureDir(from, to, options)
-    results[0] = fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/child-2'))
+    results[++i] = fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/child-2'))
   } catch (err) {
     console.error(err)
   }
@@ -54,7 +56,8 @@ test('CompileEjsTask.ensureDir()', async () => {
 })
 
 test('CompileEjsTask.removeFile()', () => {
-  const results = [ false, false ]
+  const results = Array(2).fill(false)
+  let i = -1
   try {
     const originalHtmlDirAbsolute = path.resolve(__dirname, './fixtures/public-html')
     const originalPhpDirAbsolute = path.resolve(__dirname, './fixtures/public-php')
@@ -69,12 +72,12 @@ test('CompileEjsTask.removeFile()', () => {
     to = 'tmp/public-html'
     options = { ext: '.html' }
     CompileEjsTask.removeFile(from, to, options)
-    results[0] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/fixture-0.html'))
+    results[++i] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/fixture-0.html'))
     // Test case that ext is '.php'
     to = 'tmp/public-php'
     options = { ext: '.php' }
     CompileEjsTask.removeFile(from, to, options)
-    results[1] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/fixture-0.php'))
+    results[++i] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/fixture-0.php'))
   } catch (err) {
     console.error(err)
   }
@@ -83,7 +86,8 @@ test('CompileEjsTask.removeFile()', () => {
 })
 
 test('CompileEjsTask.removeDir()', () => {
-  const results = [ false ]
+  const results = Array(1).fill(false)
+  let i = -1
   try {
     const originalDirAbsolute = path.resolve(__dirname, './fixtures/public-html/child-0')
     const targetDirAbsolute = path.resolve(__dirname, '../tmp/public/child-0')
@@ -92,7 +96,7 @@ test('CompileEjsTask.removeDir()', () => {
     const to = 'tmp/public'
     const options = {}
     CompileEjsTask.removeDir(from, to, options)
-    results[0] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/child-0'))
+    results[++i] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/child-0'))
   } catch (err) {
     console.error(err)
   }
@@ -101,7 +105,8 @@ test('CompileEjsTask.removeDir()', () => {
 })
 
 test('compileEjsTask.run()', async () => {
-  const results = [ false, false ]
+  const results = Array(2).fill(false)
+  let i = -1
   try {
     // Wait for several ms, instead of subscription to events
     // Because there is no event to notify that compilation is over
@@ -130,7 +135,7 @@ test('compileEjsTask.run()', async () => {
       correctPaths.map(fileRelative => fileRelative.split(correctDirRelative).pop())
     const equalsToCorrectComparingPath = (outputComparingPath, i) =>
       outputComparingPath === correctComparingPaths[i]
-    results[0] = outputComparingPaths.every(equalsToCorrectComparingPath)
+    results[++i] = outputComparingPaths.every(equalsToCorrectComparingPath)
     // Test that all files are equal between output directory and fixture directory
     const createBuf = fileRelative =>
       fs.readFileSync(path.resolve(__dirname, '../', fileRelative))
@@ -138,7 +143,7 @@ test('compileEjsTask.run()', async () => {
     const correctBufList = correctPaths.map(createBuf)
     const equalsToCorrectBuf =
       (outputBuf, i) => outputBuf.equals(correctBufList[i])
-    results[1] = outputBufList.every(equalsToCorrectBuf)
+    results[++i] = outputBufList.every(equalsToCorrectBuf)
   } catch (err) {
     console.error(err)
   }
@@ -147,7 +152,8 @@ test('compileEjsTask.run()', async () => {
 })
 
 test('compileEjsTask.watch()', async () => {
-  const results = [ false, false, false, false, false, false, false, false ]
+  const results = Array(8).fill(false)
+  let i = -1
   let compileEjsTask = null
   try {
     // Wait for several ms, instead of subscription to events
@@ -173,7 +179,7 @@ test('compileEjsTask.watch()', async () => {
       partials: 'tmp/resources/partials/**/*',
       _onError (err) {
         if (!testingToWatchRemovingPartial) throw err
-        results[6] = true
+        results[++i] = true
       }
     }
     compileEjsTask = new CompileEjsTask({ from, to, data, options })
@@ -191,7 +197,7 @@ test('compileEjsTask.watch()', async () => {
       correctPaths.map(fileRelative => fileRelative.split(correctDirRelative).pop())
     const equalsToCorrectComparingPath = (outputComparingPath, i) =>
       outputComparingPath === correctComparingPaths[i]
-    results[0] = outputComparingPaths.every(equalsToCorrectComparingPath)
+    results[++i] = outputComparingPaths.every(equalsToCorrectComparingPath)
     // Test that all files are equal between output directory and fixture directory
     const createBuf = fileRelative =>
       fs.readFileSync(path.resolve(__dirname, '../', fileRelative))
@@ -199,7 +205,7 @@ test('compileEjsTask.watch()', async () => {
     const correctBufList = correctPaths.map(createBuf)
     const equalsToCorrectBuf =
       (outputBuf, i) => outputBuf.equals(correctBufList[i])
-    results[1] = outputBufList.every(equalsToCorrectBuf)
+    results[++i] = outputBufList.every(equalsToCorrectBuf)
     // Test to watch changing directory and file
     originalDirAbsolute = path.resolve(__dirname, './fixtures/resources/child-1')
     targetDirAbsolute = path.resolve(__dirname, '../tmp/resources/child-0')
@@ -208,7 +214,7 @@ test('compileEjsTask.watch()', async () => {
     await delay(msWaiting)
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/child-0/fixture-child-1.html'))
     correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-html/child-1/fixture-child-1.html'))
-    results[2] = outputBuf.equals(correctBuf)
+    results[++i] = outputBuf.equals(correctBuf)
     // Test to watch adding directory and file
     originalDirAbsolute = path.resolve(__dirname, './fixtures/resources/child-1')
     targetDirAbsolute = path.resolve(__dirname, '../tmp/resources/child-2')
@@ -216,11 +222,11 @@ test('compileEjsTask.watch()', async () => {
     await delay(msWaiting)
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/child-2/fixture-child-1.html'))
     correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-html/child-1/fixture-child-1.html'))
-    results[3] = outputBuf.equals(correctBuf)
+    results[++i] = outputBuf.equals(correctBuf)
     // Test to watch removing directory and file
     fs.removeSync(path.resolve(__dirname, '../tmp/resources/child-2'))
     await delay(msWaiting)
-    results[4] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/child-2/fixture-child-1.html'))
+    results[++i] = !fs.pathExistsSync(path.resolve(__dirname, '../tmp/public/child-2/fixture-child-1.html'))
     // Test to watch changing partial
     originalFileAbsolute = path.resolve(__dirname, './fixtures/resources/partials/partial-1.ejs')
     targetFileAbsolute = path.resolve(__dirname, '../tmp/resources/partials/partial-0.ejs')
@@ -228,7 +234,7 @@ test('compileEjsTask.watch()', async () => {
     await delay(msWaiting)
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/fixture-0.html'))
     correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-html/fixture-1.html'))
-    results[5] = outputBuf.equals(correctBuf)
+    results[++i] = outputBuf.equals(correctBuf)
     // Test to watch removing partial
     testingToWatchRemovingPartial = true
     fs.removeSync(path.resolve(__dirname, '../tmp/resources/partials/partial-0.ejs'))
@@ -241,7 +247,7 @@ test('compileEjsTask.watch()', async () => {
     await delay(msWaiting)
     outputBuf = fs.readFileSync(path.resolve(__dirname, '../tmp/public/fixture-0.html'))
     correctBuf = fs.readFileSync(path.resolve(__dirname, './fixtures/public-html/fixture-0.html'))
-    results[7] = outputBuf.equals(correctBuf)
+    results[++i] = outputBuf.equals(correctBuf)
   } catch (err) {
     console.error(err)
   }
