@@ -11,7 +11,7 @@ const optionsDefault = {
   base: '',
   ext: '.html',
   partials: [],
-  _onError: () => {}
+  _onError: err => { throw err }
 }
 
 class CompileEjsTask extends Task {
