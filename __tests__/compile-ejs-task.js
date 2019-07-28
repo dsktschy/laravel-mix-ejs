@@ -114,7 +114,7 @@ test('compileEjsTask.run()', async () => {
     const originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
     const targetDirAbsolute = path.resolve(__dirname, '../tmp/resources')
     fs.copySync(originalDirAbsolute, targetDirAbsolute)
-    const from = 'tmp/resources/**/*'
+    const from = 'tmp/resources'
     const to = 'tmp/public'
     const data = { name: 'Laravel Mix EJS', getAuthor: () => author }
     const options = {
@@ -126,21 +126,23 @@ test('compileEjsTask.run()', async () => {
     await delay(msWaiting)
     const outputDirRelative = 'tmp/public'
     const correctDirRelative = '__tests__/fixtures/public-html'
-    const outputPaths = globby.sync(outputDirRelative, { onlyFiles: true })
-    const correctPaths = globby.sync(correctDirRelative, { onlyFiles: true })
-    // Test that directory structure is equal between output and fixture
+    const outputPathsAll = globby.sync(outputDirRelative, { onlyFiles: false })
+    const correctPathsAll = globby.sync(correctDirRelative, { onlyFiles: false })
+    const outputPathsOnlyFiles = globby.sync(outputDirRelative, { onlyFiles: true })
+    const correctPathsOnlyFiles = globby.sync(correctDirRelative, { onlyFiles: true })
+    // Test whether directory structure is equal between output and fixture
     const outputComparingPaths =
-      outputPaths.map(fileRelative => fileRelative.split(outputDirRelative).pop())
+      outputPathsAll.map(fileRelative => fileRelative.split(outputDirRelative).pop())
     const correctComparingPaths =
-      correctPaths.map(fileRelative => fileRelative.split(correctDirRelative).pop())
+      correctPathsAll.map(fileRelative => fileRelative.split(correctDirRelative).pop())
     const equalsToCorrectComparingPath = (outputComparingPath, i) =>
       outputComparingPath === correctComparingPaths[i]
     results[++i] = outputComparingPaths.every(equalsToCorrectComparingPath)
-    // Test that all files are equal between output directory and fixture directory
+    // Test whether all files are equal between output directory and fixture directory
     const createBuf = fileRelative =>
       fs.readFileSync(path.resolve(__dirname, '../', fileRelative))
-    const outputBufList = outputPaths.map(createBuf)
-    const correctBufList = correctPaths.map(createBuf)
+    const outputBufList = outputPathsOnlyFiles.map(createBuf)
+    const correctBufList = correctPathsOnlyFiles.map(createBuf)
     const equalsToCorrectBuf =
       (outputBuf, i) => outputBuf.equals(correctBufList[i])
     results[++i] = outputBufList.every(equalsToCorrectBuf)
@@ -170,7 +172,7 @@ test('compileEjsTask.watch()', async () => {
     originalDirAbsolute = path.resolve(__dirname, './fixtures/resources')
     targetDirAbsolute = path.resolve(__dirname, '../tmp/resources')
     fs.copySync(originalDirAbsolute, targetDirAbsolute)
-    const from = 'tmp/resources/**/*'
+    const from = 'tmp/resources'
     const to = 'tmp/public'
     const data = { name: 'Laravel Mix EJS', getAuthor: () => author }
     const options = {
@@ -188,21 +190,23 @@ test('compileEjsTask.watch()', async () => {
     await delay(msWaiting)
     const outputDirRelative = 'tmp/public'
     const correctDirRelative = '__tests__/fixtures/public-html'
-    const outputPaths = globby.sync(outputDirRelative, { onlyFiles: true })
-    const correctPaths = globby.sync(correctDirRelative, { onlyFiles: true })
-    // Test that directory structure is equal between output and fixture
+    const outputPathsAll = globby.sync(outputDirRelative, { onlyFiles: false })
+    const correctPathsAll = globby.sync(correctDirRelative, { onlyFiles: false })
+    const outputPathsOnlyFiles = globby.sync(outputDirRelative, { onlyFiles: true })
+    const correctPathsOnlyFiles = globby.sync(correctDirRelative, { onlyFiles: true })
+    // Test whether directory structure is equal between output and fixture
     const outputComparingPaths =
-      outputPaths.map(fileRelative => fileRelative.split(outputDirRelative).pop())
+      outputPathsAll.map(fileRelative => fileRelative.split(outputDirRelative).pop())
     const correctComparingPaths =
-      correctPaths.map(fileRelative => fileRelative.split(correctDirRelative).pop())
+      correctPathsAll.map(fileRelative => fileRelative.split(correctDirRelative).pop())
     const equalsToCorrectComparingPath = (outputComparingPath, i) =>
       outputComparingPath === correctComparingPaths[i]
     results[++i] = outputComparingPaths.every(equalsToCorrectComparingPath)
-    // Test that all files are equal between output directory and fixture directory
+    // Test whether all files are equal between output directory and fixture directory
     const createBuf = fileRelative =>
       fs.readFileSync(path.resolve(__dirname, '../', fileRelative))
-    const outputBufList = outputPaths.map(createBuf)
-    const correctBufList = correctPaths.map(createBuf)
+    const outputBufList = outputPathsOnlyFiles.map(createBuf)
+    const correctBufList = correctPathsOnlyFiles.map(createBuf)
     const equalsToCorrectBuf =
       (outputBuf, i) => outputBuf.equals(correctBufList[i])
     results[++i] = outputBufList.every(equalsToCorrectBuf)
