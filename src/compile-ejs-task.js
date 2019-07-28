@@ -17,6 +17,11 @@ class CompileEjsTask extends Task {
   constructor (data) {
     super(data)
     this.data.options = Object.assign(optionsDefault, this.data.options)
+    const { base, ext } = this.data.options
+    // Base option must end without '/'
+    this.data.options.base = base.endsWith('/') ? base.slice(0, -1) : base
+    // Ext option must start with '.'
+    this.data.options.ext = ext.startsWith('.') ? ext : `.${ext}`
     this.watcher = null
   }
   run () {
@@ -79,6 +84,7 @@ class CompileEjsTask extends Task {
     fs.outputFileSync(toFileAbsolute, result)
   }
   static ensureDir (fromDirRelative, toDirRelative, options) {
+    if (fromDirRelative === options.base) return
     const { name, dir } = path.parse(fromDirRelative)
     let subDir = options.base ? dir.split(options.base).pop() : ''
     subDir = subDir.startsWith('/') ? subDir.slice(1) : subDir
@@ -93,6 +99,7 @@ class CompileEjsTask extends Task {
     fs.removeSync(toFileAbsolute)
   }
   static removeDir (fromDirRelative, toDirRelative, options) {
+    if (fromDirRelative === options.base) return
     const { name, dir } = path.parse(fromDirRelative)
     let subDir = options.base ? dir.split(options.base).pop() : ''
     subDir = subDir.startsWith('/') ? subDir.slice(1) : subDir
