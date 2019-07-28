@@ -20,7 +20,7 @@ require('laravel-mix-ejs')
 mix
   .js('resources/js/app.js', 'public/js')
   .sass('resources/sass/app.scss', 'public/css')
-  .ejs('resources/views/**/*', 'public')
+  .ejs('resources/views', 'public')
 ```
 
 And you're done!
@@ -31,7 +31,7 @@ With the 3rd argument, it is possible to inject variables used in templates.
 
 ```js
 mix.ejs(
-  'resources/views/**/*',
+  'resources/views',
   'public',
   { foo: 'bar' }
 )
@@ -43,7 +43,7 @@ With the 4th argument, it is possible to set [options for EJS](https://github.co
 
 ```js
 mix.ejs(
-  'resources/views/**/*',
+  'resources/views',
   'public',
   { foo: 'bar' },
   { rmWhitespace: true }
@@ -58,7 +58,7 @@ This option keeps a hierarchical structure (like Gulp).
 
 ```js
 mix.ejs(
-  'resources/views/**/*',
+  'resources/views',
   'public',
   { foo: 'bar' },
   { base: 'resources/views' }
@@ -71,7 +71,7 @@ This option changes the output file extension.
 
 ```js
 mix.ejs(
-  'resources/views/**/*',
+  'resources/views',
   'public',
   { foo: 'bar' },
   { ext: '.php' }
@@ -80,13 +80,13 @@ mix.ejs(
 
 #### partials
 
-Files set to this option will be watched but not compiled.
+Paths set to this option will be watched but not compiled.
 
 ```js
 mix.ejs(
-  'resources/views/**/*',
+  'resources/views',
   'public',
   { foo: 'bar' },
-  { partials: 'resources/views/partials/**/*' }
+  { partials: 'resources/views/partials' }
 )
 ```
