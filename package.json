@@ -9,7 +9,8 @@
     "chokidar": "^3.0.2",
     "ejs": "^2.6.2",
     "fs-extra": "^8.1.0",
-    "globby": "^10.0.1"
+    "globby": "^10.0.1",
+    "is-glob": "^4.0.1"
   },
   "devDependencies": {
     "delay": "^4.3.0",

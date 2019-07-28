@@ -3,6 +3,7 @@ const path = require('path')
 const fs = require('fs-extra')
 const globby = require('globby')
 const chokidar = require('chokidar')
+const isGlob = require('is-glob')
 const anymatch = require('anymatch')
 const Task = require('laravel-mix/src/tasks/Task')
 
@@ -16,13 +17,21 @@ const optionsDefault = {
 class CompileEjsTask extends Task {
   constructor (data) {
     super(data)
+    this.watcher = null
     this.data.options = Object.assign(optionsDefault, this.data.options)
-    const { base, ext } = this.data.options
+    const { base, ext, partials } = this.data.options
     // Base option must end without '/'
     this.data.options.base = base.endsWith('/') ? base.slice(0, -1) : base
     // Ext option must start with '.'
     this.data.options.ext = ext.startsWith('.') ? ext : `.${ext}`
-    this.watcher = null
+    // Partials option must be array
+    this.data.options.partials = Array.isArray(partials) ? partials : [ partials ]
+    this.data.options.partials.forEach((partial, i, _partials) => {
+      // Partial must end without '/'
+      if (partial.endsWith('/')) _partials[i] = partial = partial.slice(0, -1)
+      // Files in directory set as partials are also partials
+      if (!isGlob(partial)) _partials.push(`${partial}/**/*`)
+    })
   }
   run () {
     this.compileAll()
@@ -54,7 +63,8 @@ class CompileEjsTask extends Task {
           this.compileAll()
         break
       case 'addDir':
-        CompileEjsTask.ensureDir(fromRelative, toDirRelative, options)
+        if (!partial)
+          CompileEjsTask.ensureDir(fromRelative, toDirRelative, options)
         break
       case 'unlink':
         if (!partial)
@@ -63,7 +73,8 @@ class CompileEjsTask extends Task {
           this.compileAll()
         break
       case 'unlinkDir':
-        CompileEjsTask.removeDir(fromRelative, toDirRelative, options)
+        if (!partial)
+          CompileEjsTask.removeDir(fromRelative, toDirRelative, options)
         break
     }
   }

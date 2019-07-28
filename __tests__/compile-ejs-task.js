@@ -120,7 +120,7 @@ test('compileEjsTask.run()', async () => {
     const options = {
       root: targetDirAbsolute,
       base: 'tmp/resources',
-      partials: 'tmp/resources/partials/**/*'
+      partials: 'tmp/resources/partials'
     }
     new CompileEjsTask({ from, to, data, options }).run()
     await delay(msWaiting)
@@ -178,7 +178,7 @@ test('compileEjsTask.watch()', async () => {
     const options = {
       root: targetDirAbsolute,
       base: 'tmp/resources',
-      partials: 'tmp/resources/partials/**/*',
+      partials: 'tmp/resources/partials',
       _onError (err) {
         if (!testingToWatchRemovingPartial) throw err
         results[++i] = true
