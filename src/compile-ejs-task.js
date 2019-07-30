@@ -40,9 +40,10 @@ class CompileEjsTask extends Task {
   watch (usePolling = false) {
     if (this.isBeingWatched) return
     const { from } = this.data
+    const options = { usePolling, ignored: /(^|[\/\\])\../ }
     const switchCallback = (eventName, fromRelative) =>
       this.switchCallback(eventName, fromRelative, true)
-    this.watcher = chokidar.watch(from, { usePolling }).on('all', switchCallback)
+    this.watcher = chokidar.watch(from, options).on('all', switchCallback)
     this.isBeingWatched = true
   }
   // Use when closing test
