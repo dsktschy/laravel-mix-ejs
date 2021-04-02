@@ -1,4 +1,4 @@
-# Laravel Mix EJS
+# Laravel Mix EJS [![npm version](https://img.shields.io/npm/v/laravel-mix-ejs.svg?style=flat-square)](https://www.npmjs.com/package/laravel-mix-ejs) [![GitHub license](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/dsktschy/laravel-mix-ejs/blob/master/LICENSE.txt)
 
 This extention provides a method to compile EJS templates.
 
