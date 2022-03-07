@@ -14,8 +14,8 @@
   },
   "devDependencies": {
     "delay": "^4.3.0",
-    "jest": "^24.8.0",
-    "laravel-mix": "^4.1.2"
+    "jest": "^27.5.1",
+    "laravel-mix": "^6.0.43"
   },
   "peerDependencies": {
     "laravel-mix": ">=4.0.0"
