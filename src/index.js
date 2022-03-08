@@ -1,10 +1,11 @@
 const mix = require('laravel-mix')
+const { Component } = require('laravel-mix/src/components/Component')
 const CompileEjsTask = require('./compile-ejs-task')
 
-class Ejs {
+class Ejs extends Component {
   register(from, to, data = {}, options = {}) {
-    Mix.addTask(new CompileEjsTask({ from, to, data, options }))
+    this.context.addTask(new CompileEjsTask({ from, to, data, options }))
   }
 }
 
-mix.extend('ejs', new Ejs())
+mix.extend('ejs', Ejs)
