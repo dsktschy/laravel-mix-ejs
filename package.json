@@ -18,7 +18,7 @@
     "laravel-mix": "^6.0.43"
   },
   "peerDependencies": {
-    "laravel-mix": ">=4.0.0"
+    "laravel-mix": ">=6.0.0"
   },
   "main": "src/index.js",
   "scripts": {
