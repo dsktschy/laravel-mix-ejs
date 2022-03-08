@@ -7,7 +7,7 @@ This extention provides a method to compile EJS templates.
 First, install the extension.
 
 ```
-npm install laravel-mix-ejs --save-dev
+npm install laravel-mix-ejs@next --save-dev
 ```
 
 Then, require it within your `webpack.mix.js` file, like so:
