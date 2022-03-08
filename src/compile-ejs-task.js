@@ -33,8 +33,10 @@ class CompileEjsTask extends Task {
       if (!isGlob(partial)) _partials.push(`${partial}/**/*`)
     })
   }
+  // Initial compilation must be executed on initial build event
+  // because manifest.json isn't yet complete here
   run () {
-    this.compileAll()
+    this.data.addInitialBuildEventListener(this.compileAll.bind(this))
   }
   // Override to watch not only changes but also additions and deletions
   watch (usePolling = false) {
