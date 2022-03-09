@@ -13,7 +13,12 @@ class Ejs extends Component {
   /**
    * Whether `mix()` returns URL with hash
    */
-  versioning = false
+  mixVersioning = false
+
+  /**
+   * Prefix for manifest values
+   */
+  mixPrefix = ''
 
   /**
    * Whether initial build event of Laravel Mix is complete
@@ -21,8 +26,9 @@ class Ejs extends Component {
   afterInitialBuildEvent = false
 
   getManifestValue(filePath) {
-    if (!this.versioning) return filePath
-    return this.context.manifest.manifest[filePath] || filePath
+    if (!this.mixVersioning) return this.mixPrefix + filePath
+    const { manifest } = this.context.manifest
+    return this.mixPrefix + (manifest[filePath] || filePath)
   }
 
   /**
@@ -39,9 +45,12 @@ class Ejs extends Component {
   }
 
   register(from, to, data = {}, options = {}) {
-    this.versioning = typeof options.versioning === 'boolean'
-      ? options.versioning
+    this.mixVersioning = typeof options.mixVersioning === 'boolean'
+      ? options.mixVersioning
       : this.context.inProduction()
+    this.mixPrefix = typeof options.mixPrefix === 'string'
+      ? options.mixPrefix
+      : ''
 
     const _this = this
     this.context.addTask(new CompileEjsTask({
