@@ -51,7 +51,7 @@ Destination path for copied files and directories.
 
 Type: `object`
 
-Overwrites the parameters used in the template.
+Overwrites the parameters used in the templates.
 
 ```js
 mix.ejs(
@@ -91,7 +91,7 @@ Contains the following parameters by default since v2.
 
 ##### **[>= v2]** mix(filePath)
 
-[The `mix` function](https://laravel-mix.com/docs/6.0/versioning#laravel-users). It returns hashed file path in `mix-manifest.json`.
+[The `mix` function](https://laravel-mix.com/docs/6.0/versioning#laravel-users). It returns a hashed file path in `mix-manifest.json`.
 
 Note: Hashes are output only if Laravel Mix versioning is enabled.
 
@@ -104,7 +104,7 @@ mix
   .ejs(
     'src/templates',
     'dist',
-    {}, // The `mix` function is provided by default
+    {}, // The `mix` function is provided by default since v2
     { base: 'src/templates' }
   )
 ```
@@ -141,7 +141,7 @@ mix
 
 Type: `object`
 
-In addition to the [EJS options](https://github.com/mde/ejs#options), the following properties can also be set.
+In addition to [the EJS options](https://github.com/mde/ejs#options), the following properties can also be set.
 
 ##### base
 
