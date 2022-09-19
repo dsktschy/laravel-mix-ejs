@@ -1,6 +1,6 @@
 {
   "name": "laravel-mix-ejs",
-  "version": "1.1.5",
+  "version": "2.0.0-alpha.3",
   "description": "Laravel Mix extension to compile EJS templates",
   "author": "dsktschy (https://github.com/dsktschy)",
   "license": "MIT",
@@ -18,7 +18,7 @@
     "laravel-mix": "^6.0.43"
   },
   "peerDependencies": {
-    "laravel-mix": ">=4.0.0"
+    "laravel-mix": ">=6.0.0"
   },
   "main": "src/index.js",
   "scripts": {

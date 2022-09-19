@@ -104,7 +104,7 @@ test('CompileEjsTask.removeDir()', () => {
   fs.removeSync(path.resolve(__dirname, '../tmp'))
 })
 
-test('compileEjsTask.run()', async () => {
+test('compileEjsTask.compileAll()', async () => {
   const results = Array(2).fill(false)
   let i = -1
   try {
@@ -122,7 +122,7 @@ test('compileEjsTask.run()', async () => {
       base: 'tmp/resources',
       partials: 'tmp/resources/partials'
     }
-    new CompileEjsTask({ from, to, data, options }).run()
+    new CompileEjsTask({ from, to, data, options }).compileAll()
     await delay(msWaiting)
     const outputDirRelative = 'tmp/public'
     const correctDirRelative = '__tests__/fixtures/public-html'
