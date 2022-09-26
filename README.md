@@ -93,7 +93,7 @@ Contains the following parameters by default since v2.
 
 [The `mix` function](https://laravel-mix.com/docs/6.0/versioning#laravel-users). It returns a hashed file path in `mix-manifest.json`.
 
-Note: Hashes are output only if Laravel Mix versioning is enabled.
+Note: Currently, hashes are output only when Laravel Mix versioning is enabled and in production mode. If needed in development mode as well, [please use this way](https://github.com/dsktschy/laravel-mix-ejs/issues/6#issuecomment-1258324544).
 
 ```js
 mix
